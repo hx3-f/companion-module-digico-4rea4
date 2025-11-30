@@ -21,10 +21,10 @@
 			"email": "jeffrey.davidsz@vicreo.eu"
 		}
 	],
-	"legacyIds": [
-		"allenheath-4rea4",
-		"companion-module-allenheath-4rea4-ilive"
-	],
+	// "legacyIds": [
+	// 	"allenheath-4rea4",
+	// 	"companion-module-allenheath-4rea4-ilive"
+	// ],
 	"runtime": {
 		"type": "node22",
 		"api": "nodejs-ipc",
