@@ -329,7 +329,7 @@ class ModuleInstance extends InstanceBase {
 				id: 'info',
 				width: 12,
 				label: 'Information',
-				value: 'This module is for the Allen & Heath dLive and iLive mixers',
+				value: 'This module is for the Allen & Heath dLive and iLive mixers, as well as the Digico 4rea4 line of consoles.',
 			},
 			{
 				type: 'textinput',
@@ -348,6 +348,7 @@ class ModuleInstance extends InstanceBase {
 				choices: [
 					{ id: 'dLive', label: 'dLive' },
 					{ id: 'iLive', label: 'iLive' },
+					{ id: '4rea4', label: '4rea4' },
 				],
 			},
 			{
@@ -355,7 +356,7 @@ class ModuleInstance extends InstanceBase {
 				id: 'midiPort',
 				label: 'MIDI Port',
 				width: 6,
-				default: 51328,
+				default: 51325, //changed from 51321
 				min: 1,
 				max: 65535,
 			},
@@ -377,6 +378,7 @@ class ModuleInstance extends InstanceBase {
 				min: 0,
 				max: 15,
 			},
+
 		]
 	}
 

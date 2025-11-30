@@ -1,11 +1,16 @@
 # Allen & Heath dLive & iLive Module
 
-This module provides comprehensive control for Allen & Heath dLive and iLive digital mixing consoles via MIDI over TCP/IP.
+This module provides comprehensive control for Digico 4rea4 digital mixing consoles via MIDI over TCP/IP.
+
+## Origins
+
+This module is almost entirely based on the work of Andrew Broughton and Jeffery Davidsz, on their Allen Heath dLive/iLive module. Lots of troubleshooting and information about this plugin can be discovered via their plugin, companion-module-allenheath-dlive-ilive
 
 ## Supported Consoles
 
 - **dLive Series**: Full feature set with up to 128 input channels, 24 DCAs, and 500 scenes
 - **iLive Series**: Compatible feature set with up to 64 input channels, 16 DCAs, and 250 scenes
+- **4rea4 Series**: Compatible feature set with up to 
 
 ## Connection Setup
 

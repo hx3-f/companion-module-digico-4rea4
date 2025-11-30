@@ -1,13 +1,17 @@
 {
-	"id": "allenheath-dlive-ilive",
-	"name": "allenheath-dlive-ilive",
-	"shortname": "dLive-ilive",
-	"description": "Allen & Heath dLive & iLive module for Companion",
-	"version": "2.0.0",
+	"id": "digico-4rea4",
+	"name": "digico-4rea4",
+	"shortname": "digico-4rea4",
+	"description": "Digico 4rea4 module for Companion",
+	"version": "1.0.0a",
 	"license": "MIT",
-	"repository": "git+https://github.com/bitfocus/companion-module-allenheath-dlive-ilive.git",
-	"bugs": "https://github.com/bitfocus/companion-module-allenheath-dlive-ilive/issues",
+	"repository": "git+https://github.com/holdenfershee/companion-module-digico-4rea4.git",
+	"bugs": "https://github.com/holdenfershee/companion-module-digico-4rea4/issues",
 	"maintainers": [
+		{
+			"name": "Holden Fershee",
+			"email": "wish-kilt-camper@duck.com"
+		},
 		{
 			"name": "Andrew Broughton",
 			"email": "andy@checkcheckonetwo.com"
@@ -18,7 +22,8 @@
 		}
 	],
 	"legacyIds": [
-		"allenheath-dlive"
+		"allenheath-dlive",
+		"companion-module-allenheath-dlive-ilive"
 	],
 	"runtime": {
 		"type": "node22",
@@ -26,10 +31,9 @@
 		"apiVersion": "1.4.0",
 		"entrypoint": "../index.js"
 	},
-	"manufacturer": "Allen & Heath",
+	"manufacturer": "Digico",
 	"products": [
-		"dLive",
-		"ilive"
+		"4rea4"
 	],
 	"keywords": [
 		"Audio",

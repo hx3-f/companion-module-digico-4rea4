@@ -10,9 +10,9 @@ module.exports = {
 	 */
 
 	getActionDefinitions() {
-		this.chCount = this.config.model == 'dLive' ? 128 : 64
-		this.dcaCount = this.config.model == 'dLive' ? 24 : 16
-		this.sceneCount = this.config.model == 'dLive' ? 500 : 250
+		this.chCount = this.config.model == '4rea4' ? 128 : 128
+		this.dcaCount = this.config.model == '4rea4' ? 48 : 48
+		this.sceneCount = this.config.model == '4rea4' ? 500 : 250
 
 		let actions = {}
 
