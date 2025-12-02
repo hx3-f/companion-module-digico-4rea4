@@ -1,6 +1,6 @@
 {
 	"name": "digico-4rea4",
-	"version": "1.0.2alpha",
+	"version": "1.0.3alpha",
 	"main": "index.js",
 	"scripts": {
 		"test": "prettier -w ."

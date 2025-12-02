@@ -1,5 +1,31 @@
 const { combineRgb } = require('@companion-module/base')
-const { offset_inputs, offset_mono_groups, size_stereo_groups, offset_stereo_groups, size_mono_aux, offset_mono_aux, offset_stereo_aux, size_mono_matrix, offset_mono_matrix, size_stereo_matrix, offset_stereo_matrix, size_mono_fx_sends, offset_mono_fx_sends, size_stereo_fx_sends, offset_stereo_fx_sends, size_fx_returns, offset_fx_returns, size_area_outs, offset_area_outs, size_cg, offset_cg } = require('./constants')
+const {
+	offset_inputs,
+	offset_mono_groups,
+	size_stereo_groups,
+	offset_stereo_groups,
+	size_mono_aux,
+	offset_mono_aux,
+	offset_stereo_aux,
+	size_mono_matrix,
+	offset_mono_matrix,
+	size_stereo_matrix,
+	offset_stereo_matrix,
+	size_mono_fx_sends,
+	offset_mono_fx_sends,
+	size_stereo_fx_sends,
+	offset_stereo_fx_sends,
+	size_fx_returns,
+	offset_fx_returns,
+	size_area_outs,
+	offset_area_outs,
+	size_cg,
+	offset_cg,
+	channel_count,
+	size_mono_groups,
+	size_stereo_aux,
+	size_inputs,
+} = require('./constants')
 
 module.exports = {
 	/**
@@ -10,26 +36,21 @@ module.exports = {
 	 * @since 1.2.0
 	 */
 
-
 	getActionDefinitions() {
-		this.chCount = 128
-		this.cgCount = 48
-		this.sceneCount = 800
-
 		let actions = {}
 
 		this.CHOICES_INPUT_CHANNEL = []
-		for (let i = 0; i < this.chCount - 1; i++) {
+		for (let i = 0; i < channel_count - 1; i++) {
 			this.CHOICES_INPUT_CHANNEL.push({ label: `CH ${i + 1}`, id: i })
 		}
 
 		this.CHOICES_SCENES = []
-		for (let i = 0; i < this.sceneCount; i++) {
+		for (let i = 0; i < scene_count; i++) {
 			this.CHOICES_SCENES.push({ label: `SCENE ${i + 1}`, id: i })
 		}
 
 		this.CHOICES_CG = []
-		for (let i = 0; i < this.cgCount; i++) {
+		for (let i = 0; i < control_group_count; i++) {
 			this.CHOICES_CG.push({ label: `CG ${i + 1}`, id: i })
 		}
 
@@ -39,7 +60,7 @@ module.exports = {
 		}
 
 		this.CHOICES_FADER = []
-		for (let i = 0; i < this.chCount; i++) {
+		for (let i = 0; i < channel_count; i++) {
 			let dbVal = ((i - 107) / 2).toFixed(1)
 			let dbStr = i == 0 ? '-INF' : dbVal == 0 ? dbVal : dbVal > 0 ? `+${dbVal}` : `-${dbVal}`
 			this.CHOICES_FADER.push({ label: `${dbStr} dB`, id: i })
@@ -119,7 +140,7 @@ module.exports = {
 		// Actions for 4rea4
 		actions['mute_input'] = {
 			name: 'Mute Input',
-			options: this.muteOptions('Input Channel', this.chCount, offset_inputs),
+			options: this.muteOptions('Input Channel', channel_count, offset_inputs),
 			callback: async (action) => {
 				this.sendAction('mute_input', action.options)
 			},
@@ -187,11 +208,11 @@ module.exports = {
 				this.sendAction('mute_fx_return', action.options)
 			},
 		}
-		actions['mute_master'] = {
-			name: 'Mute Group Master',
-			options: this.muteOptions('Mute Group Master', size_area_outs, offset_area_outs),
+		actions['mute_area_outs'] = {
+			name: 'Mute Area Outs',
+			options: this.muteOptions('Mute Area Outs', size_area_outs, offset_area_outs),
 			callback: async (action) => {
-				this.sendAction('mute_master', action.options)
+				this.sendAction('mute_area_outs', action.options)
 			},
 		}
 		actions['mute_cg'] = {
@@ -201,116 +222,95 @@ module.exports = {
 				this.sendAction('mute_cg', action.options)
 			},
 		}
-		actions['mute_ufx_send'] = {
-			name: 'Mute UFX Stereo Send',
-			options: this.muteOptions('UFX Stereo Send', 8, 0x55),
-			callback: async (action) => {
-				this.sendAction('mute_ufx_send', action.options)
-			},
-		}
-		actions['mute_ufx_return'] = {
-			name: 'Mute UFX Stereo Return',
-			options: this.muteOptions('UFX Stereo Return', 8, 0x5d),
-			callback: async (action) => {
-				this.sendAction('mute_ufx_return', action.options)
-			},
-		}
+
+		//UFX mute modules in unimnplemented.js go here
+		//NOT IMPLEMENTED IN 4REA4
+
 		actions['fader_input'] = {
 			name: 'Set Input Fader to Level',
-			options: this.faderOptions('Channel', this.chCount, -1),
+			options: this.faderOptions('Channel', channel_count, offset_inputs),
 			callback: async (action) => {
 				this.sendAction('fader_input', action.options)
 			},
 		}
 		actions['fader_mono_group'] = {
 			name: 'Set Mono Group Master Fader to Level',
-			options: this.faderOptions('Mono Group', 62, -1),
+			options: this.faderOptions('Mono Group', size_mono_groups, offset_mono_groups),
 			callback: async (action) => {
 				this.sendAction('fader_mono_group', action.options)
 			},
 		}
 		actions['fader_stereo_group'] = {
 			name: 'Set Stereo Group Master Fader to Level',
-			options: this.faderOptions('Stereo Group', 31, 0x3f),
+			options: this.faderOptions('Stereo Group', size_stereo_groups, offset_stereo_groups),
 			callback: async (action) => {
 				this.sendAction('fader_stereo_group', action.options)
 			},
 		}
 		actions['fader_mono_aux'] = {
 			name: 'Set Mono Aux Master Fader to Level',
-			options: this.faderOptions('Mono Aux', 62, -1),
+			options: this.faderOptions('Mono Aux', size_mono_aux, offset_mono_aux),
 			callback: async (action) => {
 				this.sendAction('fader_mono_aux', action.options)
 			},
 		}
 		actions['fader_stereo_aux'] = {
 			name: 'Set Stereo Aux Master Fader to Level',
-			options: this.faderOptions('Stereo Aux', 31, 0x3f),
+			options: this.faderOptions('Stereo Aux', size_stereo_aux, offset_stereo_aux),
 			callback: async (action) => {
 				this.sendAction('fader_stereo_aux', action.options)
 			},
 		}
 		actions['fader_mono_matrix'] = {
 			name: 'Set Mono Matrix Master Fader to Level',
-			options: this.faderOptions('Mono Matrix', 62, -1),
+			options: this.faderOptions('Mono Matrix', size_mono_matrix, offset_mono_matrix),
 			callback: async (action) => {
 				this.sendAction('fader_mono_matrix', action.options)
 			},
 		}
 		actions['fader_stereo_matrix'] = {
 			name: 'Set Stereo Matrix Master Fader to Level',
-			options: this.faderOptions('Stereo Matrix', 31, 0x3f),
+			options: this.faderOptions('Stereo Matrix', size_stereo_matrix, offset_stereo_matrix),
 			callback: async (action) => {
 				this.sendAction('fader_stereo_matrix', action.options)
 			},
 		}
 		actions['fader_mono_fx_send'] = {
 			name: 'Set Mono FX Send Master Fader to Level',
-			options: this.faderOptions('Mono FX Send', 16, -1),
+			options: this.faderOptions('Mono FX Send', size_mono_fx_sends, offset_mono_fx_sends),
 			callback: async (action) => {
 				this.sendAction('fader_mono_fx_send', action.options)
 			},
 		}
 		actions['fader_stereo_fx_send'] = {
 			name: 'Set Stereo FX Send Master Fader to Level',
-			options: this.faderOptions('Stereo FX Send', 16, 0x0f),
+			options: this.faderOptions('Stereo FX Send', size_stereo_fx_sends, offset_stereo_fx_sends),
 			callback: async (action) => {
 				this.sendAction('fader_stereo_fx_send', action.options)
 			},
 		}
 		actions['fader_fx_return'] = {
 			name: 'Set FX Return Fader to Level',
-			options: this.faderOptions('FX Return', 16, 0x1f),
+			options: this.faderOptions('FX Return', size_fx_returns, offset_fx_returns),
 			callback: async (action) => {
 				this.sendAction('fader_fx_return', action.options)
 			},
 		}
 		actions['fader_CG'] = {
 			name: 'Set CG Fader to Level',
-			options: this.faderOptions('CG', 24, 0x35),
+			options: this.faderOptions('CG', size_cg, offset_cg),
 			callback: async (action) => {
 				this.sendAction('fader_CG', action.options)
 			},
 		}
-		actions['fader_ufx_send'] = {
-			name: 'Set UFX Stereo Send Fader to Level',
-			options: this.faderOptions('UFX Stereo Send', 8, 0x55),
-			callback: async (action) => {
-				this.sendAction('fader_ufx_send', action.options)
-			},
-		}
-		actions['fader_ufx_return'] = {
-			name: 'Set UFX Stereo Return Fader to Level',
-			options: this.faderOptions('UFX Stereo Return', 8, 0x5d),
-			callback: async (action) => {
-				this.sendAction('fader_ufx_return', action.options)
-			},
-		}
+
+		//fader UFX send modules in unimplemented.js go here
+		//NOT IMPLEMENTED IN 4REA4
 
 		// Actions for all products
 		actions['phantom'] = {
 			name: 'Toggle 48v Phantom on Preamp',
-			options: this.phantomOptions('Preamp', this.chCount, -1),
+			options: this.phantomOptions('Preamp', size_inputs, offset_inputs),
 			callback: async (action) => {
 				this.sendAction('phantom', action.options)
 			},
@@ -667,185 +667,8 @@ module.exports = {
 			},
 		}
 
-		// UFX Send Level Controls
-		actions['send_ufx'] = {
-			name: 'Set UFX Stereo Send Level',
-			options: this.sendLevelOptions('UFX Stereo Send', 8, 0x55),
-			callback: async (action) => {
-				this.sendAction('send_ufx', action.options)
-			},
-		}
-
-		// UFX Global Key Control
-		this.CHOICES_UFX_KEY = [
-			{ label: 'C', id: 0x00 },
-			{ label: 'C#', id: 0x01 },
-			{ label: 'D', id: 0x02 },
-			{ label: 'D#', id: 0x03 },
-			{ label: 'E', id: 0x04 },
-			{ label: 'F', id: 0x05 },
-			{ label: 'F#', id: 0x06 },
-			{ label: 'G', id: 0x07 },
-			{ label: 'G#', id: 0x08 },
-			{ label: 'A', id: 0x09 },
-			{ label: 'A#', id: 0x0a },
-			{ label: 'B', id: 0x0b },
-		]
-
-		actions['ufx_global_key'] = {
-			name: 'Set UFX Global Key',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Key',
-					id: 'key',
-					default: 0x00,
-					choices: this.CHOICES_UFX_KEY,
-				},
-			],
-			callback: async (action) => {
-				this.sendAction('ufx_global_key', action.options)
-			},
-		}
-
-		// UFX Global Scale Control
-		this.CHOICES_UFX_SCALE = [
-			{ label: 'Major', id: 0x00 },
-			{ label: 'Minor', id: 0x01 },
-		]
-
-		actions['ufx_global_scale'] = {
-			name: 'Set UFX Global Scale',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Scale',
-					id: 'scale',
-					default: 0x00,
-					choices: this.CHOICES_UFX_SCALE,
-				},
-			],
-			callback: async (action) => {
-				this.sendAction('ufx_global_scale', action.options)
-			},
-		}
-
-		// UFX Unit Parameter Control
-		actions['ufx_unit_parameter'] = {
-			name: 'Set UFX Unit Parameter',
-			options: [
-				{
-					type: 'number',
-					label: 'UFX MIDI Channel (M)',
-					id: 'midiChannel',
-					default: 1,
-					min: 1,
-					max: 16,
-				},
-				{
-					type: 'number',
-					label: 'Control Number (nn)',
-					id: 'controlNumber',
-					default: 1,
-					min: 0,
-					max: 127,
-				},
-				{
-					type: 'number',
-					label: 'Value (vv)',
-					id: 'value',
-					default: 0,
-					min: 0,
-					max: 127,
-				},
-			],
-			callback: async (action) => {
-				this.sendAction('ufx_unit_parameter', action.options)
-			},
-		}
-
-		// UFX Unit Key Parameter (with CC value scaling)
-		actions['ufx_unit_key'] = {
-			name: 'Set UFX Unit Key Parameter',
-			options: [
-				{
-					type: 'number',
-					label: 'UFX MIDI Channel (M)',
-					id: 'midiChannel',
-					default: 1,
-					min: 1,
-					max: 16,
-				},
-				{
-					type: 'number',
-					label: 'Control Number (nn)',
-					id: 'controlNumber',
-					default: 1,
-					min: 0,
-					max: 127,
-				},
-				{
-					type: 'dropdown',
-					label: 'Key',
-					id: 'key',
-					default: 'C',
-					choices: [
-						{ label: 'C', id: 'C' },
-						{ label: 'C#', id: 'C#' },
-						{ label: 'D', id: 'D' },
-						{ label: 'D#', id: 'D#' },
-						{ label: 'E', id: 'E' },
-						{ label: 'F', id: 'F' },
-						{ label: 'F#', id: 'F#' },
-						{ label: 'G', id: 'G' },
-						{ label: 'G#', id: 'G#' },
-						{ label: 'A', id: 'A' },
-						{ label: 'A#', id: 'A#' },
-						{ label: 'B', id: 'B' },
-					],
-				},
-			],
-			callback: async (action) => {
-				this.sendAction('ufx_unit_key', action.options)
-			},
-		}
-
-		// UFX Unit Scale Parameter (with CC value scaling)
-		actions['ufx_unit_scale'] = {
-			name: 'Set UFX Unit Scale Parameter',
-			options: [
-				{
-					type: 'number',
-					label: 'UFX MIDI Channel (M)',
-					id: 'midiChannel',
-					default: 1,
-					min: 1,
-					max: 16,
-				},
-				{
-					type: 'number',
-					label: 'Control Number (nn)',
-					id: 'controlNumber',
-					default: 1,
-					min: 0,
-					max: 127,
-				},
-				{
-					type: 'dropdown',
-					label: 'Scale',
-					id: 'scale',
-					default: 'Major',
-					choices: [
-						{ label: 'Major', id: 'Major' },
-						{ label: 'Minor', id: 'Minor' },
-						{ label: 'Chromatic', id: 'Chromatic' },
-					],
-				},
-			],
-			callback: async (action) => {
-				this.sendAction('ufx_unit_scale', action.options)
-			},
-		}
+		//UFX Send Level Controls in unimplemented.js go here
+		//NOT IMPLEMENTED IN 4REA4
 
 		// Input to Main Assignment
 		actions['input_to_main'] = {

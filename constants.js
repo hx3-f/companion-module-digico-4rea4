@@ -12,7 +12,7 @@ export const size_fx_returns = 16
 export const size_area_outs = 4
 export const size_cg = 24
 export const size_mute_groups = 8
- 
+
 export const offset_inputs = -1
 export const offset_mono_groups = -1
 export const offset_stereo_groups = 0x40 - 1
@@ -26,6 +26,10 @@ export const offset_fx_returns = 0x20 - 1
 export const offset_area_outs = 0x30 - 1
 export const offset_cg = 0x36 - 1
 export const offset_mute_groups = 0x40 - 1
+
+export const channel_count = 128
+export const control_group_count = 48
+export const scene_count = 800
 
 // dBu Decimal Mapping Array
 export const dbu_Values = [
@@ -158,4 +162,3 @@ export const dbu_Values = [
 	'+9.5',
 	'+10.0',
 ]
-

@@ -41,7 +41,7 @@ const upgradeScripts = [
 			updatedFeedbacks: [],
 		}
 
-		let dcaChArr = []
+		let cgChArr = []
 
 		console.log('Running 1.0.x -> 1.2.0 Upgrade.')
 
@@ -54,12 +54,12 @@ const upgradeScripts = [
 					newAction.options.mute = action.options.mute == 'mute_on' ? true : false
 					changed = true
 					break
-				case 'dca_assignment_on':
-					if (dcaChArr[action.options.inputChannel] == undefined) {
-						dcaChArr[action.options.inputChannel] = []
+				case 'cg_assignment_on':
+					if (cgChArr[action.options.inputChannel] == undefined) {
+						cgChArr[action.options.inputChannel] = []
 					}
-					newAction.actionId = 'dca_assign'
-					dcaChArr[action.options.inputChannel].push(`${action.options.dcaChannel & 0x3f}`)
+					newAction.actionId = 'cg_assign'
+					cgChArr[action.options.inputChannel].push(`${action.options.cgChannel & 0x3f}`)
 					changed = true
 					break
 				case 'scene_recall_128':
@@ -77,10 +77,10 @@ const upgradeScripts = [
 			}
 		}
 
-		// Update DCA assignments
+		// Update CG assignments
 		for (let action of result.updatedActions) {
-			if (action.actionId == 'dca_assign') {
-				action.options['dcaGroup'] = dcaChArr[action.options.inputChannel]
+			if (action.actionId == 'cg_assign') {
+				action.options['cgGroup'] = cgChArr[action.options.inputChannel]
 			}
 		}
 

@@ -9,7 +9,7 @@ The feedback portion of this module is heavily based on (Jeffery Davidsz's)[http
 
 ## Supported Consoles
 
-- **4rea4 Series**: Compatible feature set with up to 128 input channels, 48 DCAs, and 800 scenes.
+- **4rea4 Series**: Compatible feature set with up to 128 input channels, 24 Control Groups, and 800 scenes.
 
 ## Connection Setup
 
@@ -35,7 +35,7 @@ The feedback portion of this module is heavily based on (Jeffery Davidsz's)[http
 - **Mute Stereo FX Sends** - Mute/unmute stereo FX sends 1-16
 - **Mute FX Returns** - Mute/unmute FX Returns 1-16
 - **Mute Area Outs** - Mute/unmute area outs 1-4
-- **Mute Control Groups_(CG)_** - Mute/unmute Control Groups 1-24
+- **Mute Control Groups*(CG)*** - Mute/unmute Control Groups 1-24
 - **Mute Groups** - Mute/unmute mute groups 1-8
 
 ### Fader Level Controls
@@ -43,7 +43,7 @@ The feedback portion of this module is heavily based on (Jeffery Davidsz's)[http
 - **Set Input Fader to Level** - Control input channel fader levels
 - **Set FX Send Master Fader to Level** - Control FX send master levels
 - **Set FX Return Fader to Level** - Control FX return levels
-- **Set DCA Fader to Level** - Control DCA fader levels
+- **Set Control Group(CG) Fader to Level** - Control CG fader levels
 - **Set Mono Group Master Fader to Level** - Control mono group master levels
 - **Set Stereo Group Master Fader to Level** - Control stereo group master levels
 - **Set Mono Aux Master Fader to Level** - Control mono aux master levels
@@ -91,38 +91,13 @@ The feedback portion of this module is heavily based on (Jeffery Davidsz's)[http
 
 ### Routing & Assignment
 
-- **Assign DCA Groups for Channel** - Assign input channels to multiple DCA groups
+- **Assign CG for Channel** - Assign input channels to multiple CG groups
 - **Assign Mute Groups for Channel** _(4rea4 only)_ - Assign input channels to multiple mute groups
 
 ### Special Features
 
 - **Talkback On** - Enable/disable talkback
 - **Virtual Soundcheck** - Switch between Inactive, Record Send, and Virtual Soundcheck modes
-
-### UFX Card Controls
-
-The UFX card is an effects processing expansion card for 4rea4 systems. These controls are available when UFX cards are installed:
-
-#### UFX Global Controls:
-
-- **Set UFX Global Key** - Control the global key setting for UFX processing (C, C#, D, D#, E, F, F#, G, G#, A, A#, B)
-- **Set UFX Global Scale** - Control the global scale setting for UFX processing (Major, Minor)
-
-#### UFX Unit Controls:
-
-- **Set UFX Unit Parameter** - Direct control of UFX unit parameters using MIDI channel M and control number
-- **Set UFX Unit Key Parameter** - Control UFX unit key with automatic CC value scaling
-- **Set UFX Unit Scale Parameter** - Control UFX unit scale with automatic CC value scaling (Major, Minor, Chromatic)
-
-#### UFX Send/Return Controls:
-
-- **Mute UFX Stereo Send** - Mute/unmute UFX stereo send buses (1-8)
-- **Mute UFX Stereo Return** - Mute/unmute UFX stereo return channels (1-8)
-- **Set UFX Stereo Send Fader to Level** - Control UFX stereo send master fader levels
-- **Set UFX Stereo Return Fader to Level** - Control UFX stereo return fader levels
-- **Set UFX Stereo Send Level** - Control individual UFX stereo send levels
-
-**Note**: UFX unit controls require configuring individual MIDI channels (M) per UFX unit in the console's FX / UFX / Show Routing / MIDI Settings. These channels must be different from the main 4rea4 system MIDI channels (N through N+4).
 
 ## Fader Level Range
 
