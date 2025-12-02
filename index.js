@@ -1,7 +1,7 @@
 /**
  *
  * Companion instance class for the DiGiCo 4rea4 line of consoles.
- * @version 1.0.3+alpha-3
+ * @version 1.0.4+alpha
  *
  */
 

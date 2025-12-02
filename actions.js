@@ -406,7 +406,7 @@ module.exports = {
 		}
 
 		actions['scene_recall'] = {
-			name: 'Scene recall',
+			name: 'Scene Recall',
 			options: [
 				{
 					type: 'dropdown',
