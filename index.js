@@ -409,6 +409,15 @@ class ModuleInstance extends InstanceBase {
 	async init() {
 		// Initialize with current config or empty object if not set yet
 		await this.configUpdated(this.config || {})
+		this.inputMuteState = new Array(128).fill(0) 
+		this.groupMuteState = new Array(64).fill(0) 	// Covers Mono and Stereo Groups
+		this.auxMuteState = new Array(64).fill(0)   	// Covers Mono and Stereo Auxes
+		this.matrixMuteState = new Array(64).fill(0)	// Covers Mono and Stereo Matrix
+		this.fxSendMuteState = new Array(32).fill(0)	// Covers Mono and Stereo FX Sends
+		this.fxReturnMuteState = new Array(16).fill(0)
+		this.dcaMuteState = new Array(24).fill(0)
+		this.muteGroupMuteState = new Array(8).fill(0)
+		this.masterMuteState = new Array(8).fill(0) 	// For Mains/Masters
 	}
 
 	/**
@@ -443,24 +452,227 @@ class ModuleInstance extends InstanceBase {
 				this.log('debug', `MIDI Connected to ${this.config.host}`)
 			})
 
-			//TODO: verify TCP for 4rea4
-			// if (this.config.model == '4rea4') {
-			// 	this.tcpSocket = new TCPHelper(this.config.host, this.config.tcpPort)
+			
+			if (this.config.model == '4rea4') {
+				this.tcpSocket = new TCPHelper(this.config.host, this.config.tcpPort)
 
-			// 	this.tcpSocket.on('status_change', (status, message) => {
-			// 		this.updateStatus(status, message)
-			// 	})
+				this.tcpSocket.on('status_change', (status, message) => {
+					this.updateStatus(status, message)
+				})
 
-			// 	this.tcpSocket.on('error', (err) => {
-			// 		this.log('error', 'TCP error: ' + err.message)
-			// 	})
+				this.tcpSocket.on('error', (err) => {
+					this.log('error', 'TCP error: ' + err.message)
+				})
 
-			// 	this.tcpSocket.on('connect', () => {
-			// 		this.log('debug', `TCP Connected to ${this.config.host}`)
-			// 	})
-			// }
+				this.tcpSocket.on('connect', () => {
+					this.log('debug', `TCP Connected to ${this.config.host}`)
+				})
+			}
+			if (this.config.host) {
+				this.midiSocket = new TCPHelper(this.config.host, this.config.midiPort)
+
+				this.midiSocket.on('status_change', (status, message) => {
+					this.updateStatus(status, message)
+				})
+
+				this.midiSocket.on('error', (err) => {
+					this.log('error', 'MIDI error: ' + err.message)
+				})
+
+				this.midiSocket.on('data', (data) => {
+					this.processIncomingData(data)
+				})
+
+				this.midiSocket.on('connect', () => {
+					this.log('debug', `MIDI Connected to ${this.config.host}`)
+					this.updateStatus(InstanceStatus.Ok)
+					
+				})
+			}
 		}
 	}
+	async performReadoutAfterConnected() {
+		await this.pollAllMonitoredFeedbacks()
+
+		// get input info
+		let unitInAmount = this.numberOfInputs
+		for (let index = 1; index <= unitInAmount; index++) {
+			this.requestMuteInfo(Constants.ChannelType.Input, index)
+			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
+			this.requestLevelInfo(Constants.ChannelType.Input, index)
+			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
+		}
+		// get zone info
+		let unitZonesAmount = this.numberOfZones
+		for (let index = 1; index <= unitZonesAmount; index++) {
+			this.requestMuteInfo(Constants.ChannelType.Zone, index)
+			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
+			this.requestLevelInfo(Constants.ChannelType.Zone, index)
+			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
+		}
+	}
+
+	requestMuteInfo(chType, chNumber) {
+		if (Helpers.checkIfValueOfEnum(chType, Constants.ChannelType) == false) {
+			return
+		}
+
+		let buffer = [
+			Buffer.from([
+				0xf0,
+				0x00,
+				0x00,
+				0x1a,
+				0x50,
+				0x12,
+				0x01,
+				0x00,
+				parseInt(chType),
+				0x01,
+				0x09,
+				parseInt(chNumber) - 1,
+				0xf7,
+			]),
+		]
+		this.sendCommand(buffer)
+	}
+
+	requestSendMuteInfo(sendType, chNumber, sendChNumber) {
+		if (Helpers.checkIfValueOfEnum(sendType, Constants.SendType) == false) {
+			return
+		}
+
+		// get types of send
+		let chType = Helpers.getChTypeOfSendType(sendType)
+		let sendChType = Helpers.getSendChTypeOfSendType(sendType)
+
+		console.log(
+			`requestSendMuteInfo: chType: ${chType}, ch: ${chNumber}, sendChType: ${sendChType}, sendChNumber: ${sendChNumber}`,
+		)
+
+		let buffer = [
+			Buffer.from([
+				0xf0,
+				0x00,
+				0x00,
+				0x1a,
+				0x50,
+				0x12,
+				0x01,
+				0x00,
+				parseInt(chType),
+				0x01,
+				0x0f,
+				0x03,
+				parseInt(chNumber) - 1,
+				parseInt(sendChType),
+				parseInt(sendChNumber) - 1,
+				0xf7,
+			]),
+		]
+		this.sendCommand(buffer)
+	}
+
+	requestLevelInfo(chType, chNumber) {
+		if (Helpers.checkIfValueOfEnum(chType, Constants.ChannelType) == false) {
+			return
+		}
+
+		let buffer = [
+			Buffer.from([
+				0xf0,
+				0x00,
+				0x00,
+				0x1a,
+				0x50,
+				0x12,
+				0x01,
+				0x00,
+				parseInt(chType),
+				0x01,
+				0x0b,
+				0x17,
+				parseInt(chNumber) - 1,
+				0xf7,
+			]),
+		]
+		this.sendCommand(buffer)
+	}
+	processIncomingData(data) {
+
+    for (let i = 0; i < data.length; i++) {
+        let byte = data[i];
+
+        // Check for Note On messages (0x90 - 0x9F)
+        // Assuming MIDI Channel N = 0 (Default). Adjust logic if N > 0.
+        if (byte >= 0x90 && byte <= 0x94) {
+            let midiChannel = byte & 0x0F;
+            let note = data[i+1];
+            let velocity = data[i+2];
+            
+            // 4rea4 Spec: Velocity > 0x40 is Mute ON, < 0x40 is Mute OFF
+            let isMuted = velocity >= 0x40 ? 1 : 0; 
+
+            // Handle based on MIDI Channel (N=0)
+            switch (midiChannel) {
+                case 0: // Ch N: Inputs
+                    if (note < 128) {
+                        this.inputMuteState[note] = isMuted;
+                        this.checkFeedbacks('inputMute');
+                    }
+                    break;
+
+                case 1: // Ch N+1: Groups (Mono 0-61, Stereo 64-95)
+                    // We map them to a single array for simplicity, or separate if you prefer
+                    this.groupMuteState[note] = isMuted;
+                    this.checkFeedbacks('groupMute');
+                    break;
+
+                case 2: // Ch N+2: Auxes (Mono 0-61, Stereo 64-95)
+                    this.auxMuteState[note] = isMuted;
+                    this.checkFeedbacks('auxMute');
+                    break;
+
+                case 3: // Ch N+3: Matrix (Mono 0-61, Stereo 64-95)
+                    this.matrixMuteState[note] = isMuted;
+                    this.checkFeedbacks('matrixMute');
+                    break;
+
+                case 4: // Ch N+4: FX, Mains, DCA, Mute Groups
+                    // Map based on Note ranges from Protocol PDF
+                    if (note >= 0x00 && note <= 0x0F) { // Mono FX Send 1-16
+                        this.fxSendMuteState[note] = isMuted; 
+                        this.checkFeedbacks('fxSendMute');
+                    } 
+                    else if (note >= 0x10 && note <= 0x1F) { // Stereo FX Send 1-16
+                        // Map to index 16-31 in our array
+                        this.fxSendMuteState[note] = isMuted; 
+                        this.checkFeedbacks('fxSendMute');
+                    }
+                    else if (note >= 0x20 && note <= 0x2F) { // FX Return 1-16
+                        this.fxReturnMuteState[note - 0x20] = isMuted;
+                        this.checkFeedbacks('fxReturnMute');
+                    }
+                    else if (note >= 0x30 && note <= 0x35) { // Mains 1-6
+                        this.masterMuteState[note - 0x30] = isMuted;
+                        this.checkFeedbacks('masterMute');
+                    }
+                    else if (note >= 0x36 && note <= 0x4D) { // DCA 1-24
+                        this.dcaMuteState[note - 0x36] = isMuted;
+                        this.checkFeedbacks('dcaMute');
+                    }
+                    else if (note >= 0x4E && note <= 0x55) { // Mute Groups 1-8
+                        this.muteGroupMuteState[note - 0x4E] = isMuted;
+                        this.checkFeedbacks('muteGroupMute');
+                    }
+                    break;
+            }
+            
+            // Skip the next 2 bytes since we processed them
+            i += 2; 
+        }
+    }
+}
 
 	/**
 	 * Process an updated configuration array.

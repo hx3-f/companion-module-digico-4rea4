@@ -3,7 +3,7 @@
 	"name": "DiGiCo-4rea4",
 	"shortname": "DiGiCo-4rea4",
 	"description": "DiGiCo 4rea4 module for Companion",
-	"version": "1.0.0b",
+	"version": "1.0.1alpha",
 	"license": "MIT",
 	"repository": "git+https://github.com/holdenfershee/companion-module-digico-4rea4.git",
 	"bugs": "https://github.com/holdenfershee/companion-module-digico-4rea4/issues",
@@ -11,14 +11,6 @@
 		{
 			"name": "Holden Fershee",
 			"email": "wish-kilt-camper@duck.com"
-		},
-		{
-			"name": "Andrew Broughton",
-			"email": "andy@checkcheckonetwo.com"
-		},
-		{
-			"name": "Jeffrey Davidsz",
-			"email": "jeffrey.davidsz@vicreo.eu"
 		}
 	],
 	"legacyIds": [],
