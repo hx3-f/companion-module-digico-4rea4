@@ -3,7 +3,7 @@
 	"name": "DiGiCo-4rea4",
 	"shortname": "4rea4",
 	"description": "DiGiCo 4rea4 module for Companion",
-	"version": "1.0.4+alpha-1",
+	"version": "1.0.4+alpha-2",
 	"license": "MIT",
 	"repository": "git+https://github.com/holdenfershee/companion-module-digico-4rea4.git",
 	"bugs": "https://github.com/holdenfershee/companion-module-digico-4rea4/issues",
