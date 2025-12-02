@@ -1,4 +1,5 @@
 const { combineRgb } = require('@companion-module/base')
+const { offset_inputs, offset_mono_groups, size_stereo_groups, offset_stereo_groups, size_mono_aux, offset_mono_aux, offset_stereo_aux, size_mono_matrix, offset_mono_matrix, size_stereo_matrix, offset_stereo_matrix, size_mono_fx_sends, offset_mono_fx_sends, size_stereo_fx_sends, offset_stereo_fx_sends, size_fx_returns, offset_fx_returns, size_area_outs, offset_area_outs, size_cg, offset_cg } = require('./constants')
 
 module.exports = {
 	/**
@@ -9,9 +10,10 @@ module.exports = {
 	 * @since 1.2.0
 	 */
 
+
 	getActionDefinitions() {
 		this.chCount = 128
-		this.dcaCount = 48
+		this.cgCount = 48
 		this.sceneCount = 800
 
 		let actions = {}
@@ -26,9 +28,9 @@ module.exports = {
 			this.CHOICES_SCENES.push({ label: `SCENE ${i + 1}`, id: i })
 		}
 
-		this.CHOICES_DCA = []
-		for (let i = 0; i < this.dcaCount; i++) {
-			this.CHOICES_DCA.push({ label: `DCA ${i + 1}`, id: i })
+		this.CHOICES_CG = []
+		for (let i = 0; i < this.cgCount; i++) {
+			this.CHOICES_CG.push({ label: `CG ${i + 1}`, id: i })
 		}
 
 		this.CHOICES_MUTE = []
@@ -117,86 +119,86 @@ module.exports = {
 		// Actions for 4rea4
 		actions['mute_input'] = {
 			name: 'Mute Input',
-			options: this.muteOptions('Input Channel', this.chCount, -1),
+			options: this.muteOptions('Input Channel', this.chCount, offset_inputs),
 			callback: async (action) => {
 				this.sendAction('mute_input', action.options)
 			},
 		}
 		actions['mute_mono_group'] = {
 			name: 'Mute Mono Group',
-			options: this.muteOptions('Mono Group', 62, -1),
+			options: this.muteOptions('Mono Group', size_inputs, offset_mono_groups),
 			callback: async (action) => {
 				this.sendAction('mute_mono_group', action.options)
 			},
 		}
 		actions['mute_stereo_group'] = {
 			name: 'Mute Stereo Group',
-			options: this.muteOptions('Stereo Group', 31, 0x3f),
+			options: this.muteOptions('Stereo Group', size_stereo_groups, offset_stereo_groups),
 			callback: async (action) => {
 				this.sendAction('mute_stereo_group', action.options)
 			},
 		}
 		actions['mute_mono_aux'] = {
 			name: 'Mute Mono Aux',
-			options: this.muteOptions('Mono Aux', 62, -1),
+			options: this.muteOptions('Mono Aux', size_mono_aux, offset_mono_aux),
 			callback: async (action) => {
 				this.sendAction('mute_mono_aux', action.options)
 			},
 		}
 		actions['mute_stereo_aux'] = {
 			name: 'Mute Stereo Aux',
-			options: this.muteOptions('Stereo Aux', 31, 0x3f),
+			options: this.muteOptions('Stereo Aux', offset_stereo_aux, offset_stereo_aux),
 			callback: async (action) => {
 				this.sendAction('mute_stereo_aux', action.options)
 			},
 		}
 		actions['mute_mono_matrix'] = {
 			name: 'Mute Mono Matrix',
-			options: this.muteOptions('Mono Matrix', 62, -1),
+			options: this.muteOptions('Mono Matrix', size_mono_matrix, offset_mono_matrix),
 			callback: async (action) => {
 				this.sendAction('mute_mono_matrix', action.options)
 			},
 		}
 		actions['mute_stereo_matrix'] = {
 			name: 'Mute Stereo Matrix',
-			options: this.muteOptions('Stereo Matrix', 31, 0x3f),
+			options: this.muteOptions('Stereo Matrix', size_stereo_matrix, offset_stereo_matrix),
 			callback: async (action) => {
 				this.sendAction('mute_stereo_matrix', action.options)
 			},
 		}
 		actions['mute_mono_fx_send'] = {
 			name: 'Mute Mono FX Send',
-			options: this.muteOptions('Mono FX Send', 16, -1),
+			options: this.muteOptions('Mono FX Send', size_mono_fx_sends, offset_mono_fx_sends),
 			callback: async (action) => {
 				this.sendAction('mute_mono_fx_send', action.options)
 			},
 		}
 		actions['mute_stereo_fx_send'] = {
 			name: 'Mute Stereo FX Send',
-			options: this.muteOptions('Stereo FX Send', 16, 0x0f),
+			options: this.muteOptions('Stereo FX Send', size_stereo_fx_sends, offset_stereo_fx_sends),
 			callback: async (action) => {
 				this.sendAction('mute_stereo_fx_send', action.options)
 			},
 		}
 		actions['mute_fx_return'] = {
 			name: 'Mute FX Return',
-			options: this.muteOptions('FX Return', 16, 0x1f),
+			options: this.muteOptions('FX Return', size_fx_returns, offset_fx_returns),
 			callback: async (action) => {
 				this.sendAction('mute_fx_return', action.options)
 			},
 		}
 		actions['mute_master'] = {
 			name: 'Mute Group Master',
-			options: this.muteOptions('Mute Group Master', 8, 0x4d),
+			options: this.muteOptions('Mute Group Master', size_area_outs, offset_area_outs),
 			callback: async (action) => {
 				this.sendAction('mute_master', action.options)
 			},
 		}
-		actions['mute_dca'] = {
-			name: 'Mute DCA',
-			options: this.muteOptions('DCA', 24, 0x35),
+		actions['mute_cg'] = {
+			name: 'Mute CG',
+			options: this.muteOptions('CG', size_cg, offset_cg),
 			callback: async (action) => {
-				this.sendAction('mute_dca', action.options)
+				this.sendAction('mute_cg', action.options)
 			},
 		}
 		actions['mute_ufx_send'] = {
@@ -283,11 +285,11 @@ module.exports = {
 				this.sendAction('fader_fx_return', action.options)
 			},
 		}
-		actions['fader_DCA'] = {
-			name: 'Set DCA Fader to Level',
-			options: this.faderOptions('DCA', 24, 0x35),
+		actions['fader_CG'] = {
+			name: 'Set CG Fader to Level',
+			options: this.faderOptions('CG', 24, 0x35),
 			callback: async (action) => {
-				this.sendAction('fader_DCA', action.options)
+				this.sendAction('fader_CG', action.options)
 			},
 		}
 		actions['fader_ufx_send'] = {
@@ -314,8 +316,8 @@ module.exports = {
 			},
 		}
 
-		actions['dca_assign'] = {
-			name: 'Assign DCA Groups for channel',
+		actions['cg_assign'] = {
+			name: 'Assign CG Groups for channel',
 			options: [
 				{
 					type: 'dropdown',
@@ -327,14 +329,14 @@ module.exports = {
 				},
 				{
 					type: 'multidropdown',
-					label: 'DCA',
-					id: 'dcaGroup',
+					label: 'CG',
+					id: 'cg',
 					default: [],
-					choices: this.CHOICES_DCA,
+					choices: this.CHOICES_CG,
 				},
 			],
 			callback: async (action) => {
-				this.sendAction('dca_assign', action.options)
+				this.sendAction('cg_assign', action.options)
 			},
 		}
 

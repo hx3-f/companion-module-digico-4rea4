@@ -1,4 +1,5 @@
 import { combineRgb } from '@companion-module/base'
+import { offset_cg, offset_fx_returns, offset_inputs, offset_mono_aux, offset_mono_groups, offset_mono_matrix, offset_mute_groups, offset_stereo_aux, offset_stereo_fx_sends, offset_stereo_matrix } from './constants'
 
 export function getFeedbacks() {
 	const feedbacks = {}
@@ -34,35 +35,35 @@ export function getFeedbacks() {
 		}
 	}
 
-	feedbacks['inputMute'] = createMuteFeedback('inputMute', 'Input', 'inputMuteState')
+	feedbacks['inputMute'] = createMuteFeedback('inputMute', 'Input', 'inputMuteState', offset_inputs)
 
 	// Mono Group (1-48 in protocol) Stereo Group (1-24 in protocol)
-	feedbacks['monoGroupMute'] = createMuteFeedback('monoGroupMute', 'MonoGroup', 'monoGroupMuteState', 0)
-	feedbacks['stereoGroupMute'] = createMuteFeedback('stereoGroupMute', 'StereoGroup', 'stereoGroupMuteState', 64)
+	feedbacks['monoGroupMute'] = createMuteFeedback('monoGroupMute', 'MonoGroup', 'monoGroupMuteState', offset_mono_groups)
+	feedbacks['stereoGroupMute'] = createMuteFeedback('stereoGroupMute', 'StereoGroup', 'stereoGroupMuteState', offset_mono_groups)
 
 	// Aux
-	feedbacks['monoAuxMute'] = createMuteFeedback('monoAuxMute', 'MonoAux', 'monoAuxMuteState', 0)
-	feedbacks['stereoAuxMute'] = createMuteFeedback('stereoAuxMute', 'StereoAux', 'stereoAuxMuteState', 64)
+	feedbacks['monoAuxMute'] = createMuteFeedback('monoAuxMute', 'MonoAux', 'monoAuxMuteState', offset_mono_aux)
+	feedbacks['stereoAuxMute'] = createMuteFeedback('stereoAuxMute', 'StereoAux', 'stereoAuxMuteState', offset_stereo_aux)
 
 	// Matrix
-	feedbacks['monoMatrixMute'] = createMuteFeedback('monoMatrixMute', 'Matrix', 'matrixMuteState', 0)
-	feedbacks['stereoMatrixMute'] = createMuteFeedback('stereoMatrixMute', 'StereoMatrix', 'stereoMatrixMuteState', 64)
+	feedbacks['monoMatrixMute'] = createMuteFeedback('monoMatrixMute', 'Matrix', 'matrixMuteState', offset_mono_matrix)
+	feedbacks['stereoMatrixMute'] = createMuteFeedback('stereoMatrixMute', 'StereoMatrix', 'stereoMatrixMuteState', offset_stereo_matrix)
 
 	// FX
-	feedbacks['monoFxSendMute'] = createMuteFeedback('monoFxSendMute', 'monoFX', 'monoFxSendMuteState', 0)
-	feedbacks['stereoFxSendMute'] = createMuteFeedback('stereoFxSendMute', 'stereoFX', 'stereoFxSendMuteState', 16)
+	feedbacks['monoFxSendMute'] = createMuteFeedback('monoFxSendMute', 'monoFX', 'monoFxSendMuteState', offset_mono_fx_sends)
+	feedbacks['stereoFxSendMute'] = createMuteFeedback('stereoFxSendMute', 'stereoFX', 'stereoFxSendMuteState', offset_stereo_fx_sends)
 
 	// FX Return
-	feedbacks['fxSendMute'] = createMuteFeedback('fxSendMute', 'FX Send', 'fxSendMuteState', 32)
+	feedbacks['fxReturnMute'] = createMuteFeedback('fxReturnMute', 'FX Return', 'fxReturnMuteState', offset_fx_returns)
 
 	//area Outs
-	feedbacks['areaOutsMute'] = createMuteFeedback('areaOutsMute', 'Area Out', 'masterMuteState', 48)
+	feedbacks['areaOutsMute'] = createMuteFeedback('areaOutsMute', 'Area Out', 'areaOutMuteState', offset_mute_groups)
 
 	//Control Groups (CG)
-	feedbacks['controlGroupCGMute'] = createMuteFeedback('controlGroupCGMute', 'Control Group (CG)', 'dcaMuteState', 54)
+	feedbacks['controlGroupCGMute'] = createMuteFeedback('controlGroupCGMute', 'CG', 'dcaMuteState', offset_cg)
 
 	//Mute Groups
-	feedbacks['muteGroupMute'] = createMuteFeedback('muteGroupMute', 'Mute Group', 'muteGroupMuteState', 78)
+	feedbacks['muteGroupMute'] = createMuteFeedback('muteGroupMute', 'Mute Group', 'muteGroupMuteState', offset_mute_groups)
 
 	return feedbacks
 }

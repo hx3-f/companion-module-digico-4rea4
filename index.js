@@ -10,6 +10,8 @@ const actions = require('./actions')
 const upgradeScripts = require('./upgrade')
 const TIME_BETW_MULTIPLE_REQ_MS = 150
 
+
+
 /**
  * @extends InstanceBase
  * @since 2.0.0
@@ -365,7 +367,7 @@ class ModuleInstance extends InstanceBase {
 			{
 				type: 'number',
 				id: 'tcpPort',
-				label: 'TCP Port (4rea4 only)',
+				label: 'TCP Port',
 				width: 6,
 				default: 51321,
 				min: 1,

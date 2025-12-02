@@ -24,22 +24,21 @@ The feedback portion of this module is heavily based on (Jeffery Davidsz's)[http
 
 ## Available Actions
 
-- **Mute Input Channel** - Mute/unmute input channels
-- **Mute FX Send** - Mute/unmute FX send buses
-- **Mute FX Return** - Mute/unmute FX return channels
-- **Mute DCA** - Mute/unmute DCA groups
-- **Toggle 48v Phantom on Preamp** - Enable/disable phantom power
-- **Mute Mono Group** - Mute/unmute mono group buses
-- **Mute Stereo Group** - Mute/unmute stereo group buses
-- **Mute Mono Aux** - Mute/unmute mono aux sends
-- **Mute Stereo Aux** - Mute/unmute stereo aux sends
-- **Mute Mono Matrix** - Mute/unmute mono matrix outputs
-- **Mute Stereo Matrix** - Mute/unmute stereo matrix outputs
-- **Mute Group Master** - Mute/unmute mute group masters
-- **Mute UFX Stereo Send** - Mute/unmute UFX stereo send buses
-- **Mute UFX Stereo Return** - Mute/unmute UFX stereo return channels
+- **Mute Input Channel** - Mute/unmute input channels 1-128
+- **Mute Mono Groups** - Mute/unmute mono groups 1-48
+- **Mute Stereo Groups** - Mute/unmute stereo groups 1-24
+- **Mute Mono Auxes** - Mute/unmute mono auxes 1-48
+- **Mute Stereo Auxes** - Mute/unmute stereo auxes 1-24
+- **Mute Mono Matrices** - Mute/unmute mono matrices 1-48
+- **Mute Stereo Matrices** - Mute/unmute stereo matrices 1-24
+- **Mute Mono FX Sends** - Mute/unmute mono FX sends 1-16
+- **Mute Stereo FX Sends** - Mute/unmute stereo FX sends 1-16
+- **Mute FX Returns** - Mute/unmute FX Returns 1-16
+- **Mute Area Outs** - Mute/unmute area outs 1-4
+- **Mute Control Groups_(CG)_** - Mute/unmute Control Groups 1-24
+- **Mute Groups** - Mute/unmute mute groups 1-8
 
-### 🎚️ Fader Level Controls
+### Fader Level Controls
 
 - **Set Input Fader to Level** - Control input channel fader levels
 - **Set FX Send Master Fader to Level** - Control FX send master levels
@@ -90,17 +89,17 @@ The feedback portion of this module is heavily based on (Jeffery Davidsz's)[http
 - **Input to Main Assign** - Assign/unassign inputs to main mix
 - **Set UFX Stereo Send Level** - Control individual UFX stereo send levels
 
-### 🎯 Routing & Assignment
+### Routing & Assignment
 
 - **Assign DCA Groups for Channel** - Assign input channels to multiple DCA groups
 - **Assign Mute Groups for Channel** _(4rea4 only)_ - Assign input channels to multiple mute groups
 
-### 🎙️ Special Features
+### Special Features
 
 - **Talkback On** - Enable/disable talkback
 - **Virtual Soundcheck** - Switch between Inactive, Record Send, and Virtual Soundcheck modes
 
-### 🎛️ UFX Card Controls
+### UFX Card Controls
 
 The UFX card is an effects processing expansion card for 4rea4 systems. These controls are available when UFX cards are installed:
 
