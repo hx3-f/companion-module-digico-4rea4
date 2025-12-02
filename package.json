@@ -1,6 +1,6 @@
 {
 	"name": "digico-4rea4",
-	"version": "1.0.0b",
+	"version": "1.0.2alpha",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"

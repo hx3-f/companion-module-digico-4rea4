@@ -8,6 +8,7 @@
 const { InstanceBase, Regex, runEntrypoint, TCPHelper } = require('@companion-module/base')
 const actions = require('./actions')
 const upgradeScripts = require('./upgrade')
+const TIME_BETW_MULTIPLE_REQ_MS = 150
 
 /**
  * @extends InstanceBase
@@ -614,21 +615,25 @@ class ModuleInstance extends InstanceBase {
             let isMuted = velocity >= 0x40 ? 1 : 0; 
 
             // Handle based on MIDI Channel (N=0)
-            switch (midiChannel) {
-                case 0: // Ch N: Inputs
+            switch (true) {
+                case (midiChannel == 0): // Ch N: Inputs
                     if (note < 128) {
                         this.inputMuteState[note] = isMuted;
                         this.checkFeedbacks('inputMute');
                     }
                     break;
 
-                case 1: // Ch N+1: Groups (Mono 0-61, Stereo 64-95)
-                    // We map them to a single array for simplicity, or separate if you prefer
+                case ((midiChannel == 1) && (note >= 0x00 && note <= 0x3D)): // Ch N+1: Groups Mono (1-48)
                     this.groupMuteState[note] = isMuted;
                     this.checkFeedbacks('groupMute');
                     break;
 
-                case 2: // Ch N+2: Auxes (Mono 0-61, Stereo 64-95)
+				case ((midiChannel == 1) && (note >= 0x40 && note <= 0x57)): // Ch N+1: Groups Stereo (1-24)
+					this.groupMuteState[note] = isMuted;
+					this.checkFeedbacks('groupMute');
+					break;
+
+                case ((midiChannel == 2) && (note >= 0x00 && note <= 0x2f)): // Ch N+2: Auxes Mono (1-48)
                     this.auxMuteState[note] = isMuted;
                     this.checkFeedbacks('auxMute');
                     break;

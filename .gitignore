@@ -4,3 +4,5 @@
 /pkg.tgz
 node_modules
 /*.tgz
+/.yarn
+/.yarnrc.yml

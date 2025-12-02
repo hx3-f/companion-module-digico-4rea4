@@ -4,11 +4,12 @@ This module provides comprehensive control for DiGiCo 4rea4 digital mixing conso
 
 ## Origins
 
-This module is almost entirely based on the work of Andrew Broughton and Jeffery Davidsz, on their Allen Heath 4rea4/iLive module. Lots of troubleshooting and information about this plugin can be discovered via their plugin, companion-module-allenheath-dlive-ilive
+This module is almost entirely based on the work of (Andrew Broughton)[https://github.com/MeestorX] and (Jeffery Davidsz)[https://github.com/JeffreyDavidsz], on their Allen Heath iDlive/iLive module. Lots of troubleshooting and information for this plugin can be discovered at their plugin's repo, (companion-module-allenheath-dlive-ilive)[https://github.com/bitfocus/companion-module-allenheath-dlive-ilive].
+The feedback portion of this module is heavily based on (Jeffery Davidsz's)[https://github.com/JeffreyDavidsz] AHM module.
 
 ## Supported Consoles
 
-- **4rea4 Series**: Compatible feature set with up to 128 input channels, 48 DCAs, and 800 scenes
+- **4rea4 Series**: Compatible feature set with up to 128 input channels, 48 DCAs, and 800 scenes.
 
 ## Connection Setup
 
