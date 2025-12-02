@@ -36,24 +36,33 @@ export function getFeedbacks() {
 
 	feedbacks['inputMute'] = createMuteFeedback('inputMute', 'Input', 'inputMuteState');
     
-    // Note: For Groups/Aux/Matrix, the protocol separates Mono (0-63) and Stereo (64+)
-    // You might want separate feedbacks or a smart one that detects the range. 
-    // This example assumes simple index mapping matching your action options.
-    
-    // Mono Group (0-61 in protocol)
-	feedbacks['groupMute'] = createMuteFeedback('groupMute', 'Group', 'groupMuteState');
+    // Mono Group (1-48 in protocol) Stereo Group (1-24 in protocol)
+	feedbacks['monoGroupMute'] = createMuteFeedback('monoGroupMute', 'MonoGroup', 'monoGroupMuteState', 0);
+    feedbacks['stereoGroupMute'] = createMuteFeedback('stereoGroupMute', 'StereoGroup', 'stereoGroupMuteState', 64);
     
     // Aux
-	feedbacks['auxMute'] = createMuteFeedback('auxMute', 'Aux', 'auxMuteState');
+	feedbacks['monoAuxMute'] = createMuteFeedback('monoAuxMute', 'MonoAux', 'monoAuxMuteState', 0);
+    feedbacks['stereoAuxMute'] = createMuteFeedback('stereoAuxMute', 'StereoAux', 'stereoAuxMuteState', 64);
     
     // Matrix
-	feedbacks['matrixMute'] = createMuteFeedback('matrixMute', 'Matrix', 'matrixMuteState');
+	feedbacks['monoMatrixMute'] = createMuteFeedback('monoMatrixMute', 'Matrix', 'matrixMuteState', 0);
+    feedbacks['stereoMatrixMute'] = createMuteFeedback('stereoMatrixMute', 'StereoMatrix', 'stereoMatrixMuteState', 64);
 
-    // DCA (Protocol 0x36 start, handled in processIncomingData logic)
-	feedbacks['dcaMute'] = createMuteFeedback('dcaMute', 'DCA', 'dcaMuteState');
+    // FX
+	feedbacks['monoFxSendMute'] = createMuteFeedback('monoFxSendMute', 'monoFX', 'monoFxSendMuteState', 0);
+    feedbacks['stereoFxSendMute'] = createMuteFeedback('stereoFxSendMute', 'stereoFX', 'stereoFxSendMuteState', 16);
 
-    // FX Send (Protocol combines Mono/Stereo, handled in processIncomingData)
-	feedbacks['fxSendMute'] = createMuteFeedback('fxSendMute', 'FX Send', 'fxSendMuteState');
+    // FX Return
+	feedbacks['fxSendMute'] = createMuteFeedback('fxSendMute', 'FX Send', 'fxSendMuteState', 32);
+
+    //area Outs
+    feedbacks['areaOutsMute'] = createMuteFeedback('areaOutsMute', 'Area Out', 'masterMuteState', 48);
+
+    //Control Groups (CG)
+    feedbacks['controlGroupCGMute'] = createMuteFeedback('controlGroupCGMute', 'Control Group (CG)', 'dcaMuteState', 54);
+
+    //Mute Groups
+    feedbacks['muteGroupMute'] = createMuteFeedback('muteGroupMute', 'Mute Group', 'muteGroupMuteState', 78);
 
 	return feedbacks
 }

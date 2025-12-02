@@ -600,13 +600,19 @@ class ModuleInstance extends InstanceBase {
 		this.sendCommand(buffer)
 	}
 	processIncomingData(data) {
-
     for (let i = 0; i < data.length; i++) {
         let byte = data[i];
 
         // Check for Note On messages (0x90 - 0x9F)
         // Assuming MIDI Channel N = 0 (Default). Adjust logic if N > 0.
         if (byte >= 0x90 && byte <= 0x94) {
+			if (byte == 0) {
+				break; // Prevent out-of-bounds access
+			}
+			else {
+				byte = 0
+			} 
+		}
             let midiChannel = byte & 0x0F;
             let note = data[i+1];
             let velocity = data[i+2];
@@ -615,59 +621,73 @@ class ModuleInstance extends InstanceBase {
             let isMuted = velocity >= 0x40 ? 1 : 0; 
 
             // Handle based on MIDI Channel (N=0)
-            switch (true) {
-                case (midiChannel == 0): // Ch N: Inputs
-                    if (note < 128) {
+			//offsets handled in feedbacks.js
+			//TODO: generalize for different offset values here and in feedbacks.js
+            switch (midiChannel) {
+                case 0: // Ch N: Inputs
+                    if (note < 0x7F) {
                         this.inputMuteState[note] = isMuted;
                         this.checkFeedbacks('inputMute');
                     }
                     break;
 
-                case ((midiChannel == 1) && (note >= 0x00 && note <= 0x3D)): // Ch N+1: Groups Mono (1-48)
-                    this.groupMuteState[note] = isMuted;
-                    this.checkFeedbacks('groupMute');
+                case 1: // Ch N+1: Groups (Mono 1-48, Stereo 1-24)
+                    if (note < 0x3D) { // Mono Groups 1-48
+						this.groupMuteState[note] = isMuted;
+						this.checkFeedbacks('monoGroupMute');
+					}
+					else if (note >= 0x40 && note < 0x57) { //stereo Groups 1-24
+						this.groupMuteState[note - 0x40] = isMuted; // Offset for Stereo Groups
+						this.checkFeedbacks('stereoGroupMute');
+					}
                     break;
 
-				case ((midiChannel == 1) && (note >= 0x40 && note <= 0x57)): // Ch N+1: Groups Stereo (1-24)
-					this.groupMuteState[note] = isMuted;
-					this.checkFeedbacks('groupMute');
-					break;
-
-                case ((midiChannel == 2) && (note >= 0x00 && note <= 0x2f)): // Ch N+2: Auxes Mono (1-48)
-                    this.auxMuteState[note] = isMuted;
-                    this.checkFeedbacks('auxMute');
+                case 2: // Ch N+2: Auxes (Mono 1-48, Stereo 1-24)
+                    if (note < 0x2F) { // Mono Groups 1-48
+						this.groupMuteState[note] = isMuted;
+						this.checkFeedbacks('monoAuxMute');
+					}
+					else if (note >= 0x40 && note < 0x57) { //stereo Groups 1-24
+						this.groupMuteState[note - 0x40] = isMuted; // Offset for Stereo Groups
+						this.checkFeedbacks('stereoAuxMute');
+					}
                     break;
-
-                case 3: // Ch N+3: Matrix (Mono 0-61, Stereo 64-95)
-                    this.matrixMuteState[note] = isMuted;
-                    this.checkFeedbacks('matrixMute');
+				
+				case 3: // Ch N+3: Matrices (Mono 1-48, Stereo 1-24)
+                    if (note < 0x2F) { // Mono Groups 1-48
+						this.groupMuteState[note] = isMuted;
+						this.checkFeedbacks('monoMatrixMute');
+					}
+					else if (note >= 0x40 && note < 0x57) { //stereo Groups 1-24
+						this.groupMuteState[note] = isMuted; // Offset for Stereo Groups
+						this.checkFeedbacks('stereoMatrixMute');
+					}
                     break;
 
                 case 4: // Ch N+4: FX, Mains, DCA, Mute Groups
-                    // Map based on Note ranges from Protocol PDF
                     if (note >= 0x00 && note <= 0x0F) { // Mono FX Send 1-16
                         this.fxSendMuteState[note] = isMuted; 
-                        this.checkFeedbacks('fxSendMute');
+                        this.checkFeedbacks('monoFxSendMute');
                     } 
                     else if (note >= 0x10 && note <= 0x1F) { // Stereo FX Send 1-16
                         // Map to index 16-31 in our array
                         this.fxSendMuteState[note] = isMuted; 
-                        this.checkFeedbacks('fxSendMute');
+                        this.checkFeedbacks('stereoFxSendMute');
                     }
                     else if (note >= 0x20 && note <= 0x2F) { // FX Return 1-16
-                        this.fxReturnMuteState[note - 0x20] = isMuted;
+                        this.fxReturnMuteState[note] = isMuted;
                         this.checkFeedbacks('fxReturnMute');
                     }
-                    else if (note >= 0x30 && note <= 0x35) { // Mains 1-6
-                        this.masterMuteState[note - 0x30] = isMuted;
-                        this.checkFeedbacks('masterMute');
+                    else if (note >= 0x30 && note <= 0x33) { // Mains 1-6
+                        this.masterMuteState[note] = isMuted;
+                        this.checkFeedbacks('areaOutsMute');
                     }
                     else if (note >= 0x36 && note <= 0x4D) { // DCA 1-24
-                        this.dcaMuteState[note - 0x36] = isMuted;
-                        this.checkFeedbacks('dcaMute');
+                        this.dcaMuteState[note] = isMuted;
+                        this.checkFeedbacks('controlGroupCGMute');
                     }
                     else if (note >= 0x4E && note <= 0x55) { // Mute Groups 1-8
-                        this.muteGroupMuteState[note - 0x4E] = isMuted;
+                        this.muteGroupMuteState[note] = isMuted;
                         this.checkFeedbacks('muteGroupMute');
                     }
                     break;
