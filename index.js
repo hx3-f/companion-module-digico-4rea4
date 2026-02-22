@@ -5,7 +5,10 @@
  *
  */
 
-const { InstanceBase, Regex, runEntrypoint, TCPHelper } = require('@companion-module/base')
+import * as Helpers from './helpers.js'
+import * as Constants from './constants.js'
+
+const { InstanceBase, Regex, runEntrypoint, TCPHelper, InstanceStatus } = require('@companion-module/base')
 const actions = require('./actions')
 const upgradeScripts = require('./upgrade')
 const {
@@ -376,8 +379,21 @@ class ModuleInstance extends InstanceBase {
 		this.cgMuteState = new Array(size_cg).fill(0)
 		this.muteGroupMuteState = new Array(size_mute_groups).fill(0)
 		this.areaOutsMuteState = new Array(size_area_outs).fill(0) // For Mains/Area Out
+		this.numberOfInputs = constants.size_inputs
+		this.numberOfZones = constants.size_area_outs
 	}
 
+	sendCommand(buffers) {
+	if (buffers.length != 0) {
+		for (let i = 0; i < buffers.length; i++) {
+			if (this.midiSocket !== undefined) {
+				this.log('debug', `sending ${buffers[i].toString('hex')} via MIDI TCP @${this.config.host}`)
+				this.midiSocket.send(buffers[i])
+			}
+		}
+	}
+	}
+	
 	/**
 	 * INTERNAL: use setup data to initalize the tcp socket object.
 	 *
@@ -406,6 +422,10 @@ class ModuleInstance extends InstanceBase {
 				this.log('error', 'MIDI error: ' + err.message)
 			})
 
+			this.midiSocket.on('data', (data) => {
+				this.processIncomingData(data)
+			})
+
 			this.midiSocket.on('connect', () => {
 				this.log('debug', `MIDI Connected to ${this.config.host}`)
 			})
@@ -425,33 +445,18 @@ class ModuleInstance extends InstanceBase {
 					this.log('debug', `TCP Connected to ${this.config.host}`)
 				})
 			}
-			if (this.config.host) {
-				this.midiSocket = new TCPHelper(this.config.host, this.config.midiPort)
-
-				this.midiSocket.on('status_change', (status, message) => {
-					this.updateStatus(status, message)
-				})
-
-				this.midiSocket.on('error', (err) => {
-					this.log('error', 'MIDI error: ' + err.message)
-				})
-
-				this.midiSocket.on('data', (data) => {
-					this.processIncomingData(data)
-				})
-
-				this.midiSocket.on('connect', () => {
-					this.log('debug', `MIDI Connected to ${this.config.host}`)
-					this.updateStatus(InstanceStatus.Ok)
-				})
-			}
 		}
 	}
+
+	sleep(ms) {
+		return new Promise((resolve) => setTimeout(resolve, ms))
+	}
+
 	async performReadoutAfterConnected() {
 		await this.pollAllMonitoredFeedbacks()
 
 		// get input info
-		let unitInAmount = this.numberOfInputs
+		let unitInAmount = constants.size_inputs
 		for (let index = 1; index <= unitInAmount; index++) {
 			this.requestMuteInfo(Constants.ChannelType.Input, index)
 			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
@@ -459,7 +464,7 @@ class ModuleInstance extends InstanceBase {
 			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
 		}
 		// get zone info
-		let unitZonesAmount = this.numberOfZones
+		let unitZonesAmount = area_outs_total
 		for (let index = 1; index <= unitZonesAmount; index++) {
 			this.requestMuteInfo(Constants.ChannelType.Zone, index)
 			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
