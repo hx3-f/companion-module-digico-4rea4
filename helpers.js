@@ -1,4 +1,4 @@
-import { InstanceBase } from '@companion-module/base'
+const { InstanceBase } = require('@companion-module/base')
 
 /**
  * Generates a Dropdown Choices Array with labelled incrementing values.
@@ -12,7 +12,7 @@ import { InstanceBase } from '@companion-module/base'
  * @param qty Amount of elements to generate
  * @param offset offset between number of elements
  */
-export function getChoicesArrayWithIncrementingNumbers(name, qty, offset) {
+function getChoicesArrayWithIncrementingNumbers(name, qty, offset) {
 	let choices = []
 	for (let i = 1; i <= qty; i++) {
 		choices.push({ label: `${name} ${i}`, id: i + offset })
@@ -30,7 +30,7 @@ export function getChoicesArrayWithIncrementingNumbers(name, qty, offset) {
  * { id: '10', label: 'Value of Array[10]' },
  * @param arr Single-Diemension Array to turn into Dropdown Choices Array
  */
-export function getChoicesArrayOf1DArray(arr) {
+function getChoicesArrayOf1DArray(arr) {
 	let choices = []
 	for (let i = 0; i < arr.length; i++) {
 		choices.push({ label: `${arr[i]}`, id: i })
@@ -48,7 +48,7 @@ export function getChoicesArrayOf1DArray(arr) {
  * { id: 'Value of Object element x', label: 'Key of Object element x' },
  * @param arr Object with key-value elements (e.g. const obj = { Element1: 0, Element2: 50 } )
  */
-export function getChoicesArrayOfKeyValueObject(kvObj) {
+function getChoicesArrayOfKeyValueObject(kvObj) {
 	let choices = []
 	for (const [key, value] of Object.entries(kvObj)) {
 		choices.push({ label: `${key}`, id: value })
@@ -60,7 +60,7 @@ export function getChoicesArrayOfKeyValueObject(kvObj) {
  * Returns the variable name of the variable that displays the input's current level.
  * @param inputNum Integer number of the Input channel
  */
-export function getVarNameInputLevel(inputNum) {
+function getVarNameInputLevel(inputNum) {
 	return `ip_${inputNum}_lvl`
 }
 
@@ -68,7 +68,7 @@ export function getVarNameInputLevel(inputNum) {
  * Returns the variable name of the variable that displays the zones's current level.
  * @param zoneNum Integer number of the Zone channel
  */
-export function getVarNameZoneLevel(zoneNum) {
+function getVarNameZoneLevel(zoneNum) {
 	return `zn_${zoneNum}_lvl`
 }
 
@@ -76,7 +76,7 @@ export function getVarNameZoneLevel(zoneNum) {
  * Returns the variable name of the variable that displays the control group's current level.
  * @param cgNum Integer number of the Control Group
  */
-export function getVarNameCGLevel(cgNum) {
+function getVarNameCGLevel(cgNum) {
 	return `cg_${cgNum}_lvl`
 }
 
@@ -85,7 +85,7 @@ export function getVarNameCGLevel(cgNum) {
  * @param value value to check if it is part of enum enumType
  * @param enumType enum to check wether value is value of
  */
-export function checkIfValueOfEnum(value, enumType) {
+function checkIfValueOfEnum(value, enumType) {
 	if (Object.values(enumType).includes(value)) {
 		return true
 	} else {
@@ -99,7 +99,7 @@ export function checkIfValueOfEnum(value, enumType) {
  * Check if the parameter sendType really is a value of the enum SendType e.g. using function validateIsSendType.
  * @param sendType Object of send type
  */
-export function getChTypeOfSendType(sendType) {
+function getChTypeOfSendType(sendType) {
 	return parseInt(0x00 + (sendType >> 4)) // right shift by 4, results in only high nibble (ch type)
 }
 
@@ -108,6 +108,18 @@ export function getChTypeOfSendType(sendType) {
  * Check if the parameter sendType really is a value of the enum SendType e.g. using function validateIsSendType.
  * @param sendType Object of send type
  */
-export function getSendChTypeOfSendType(sendType) {
+function getSendChTypeOfSendType(sendType) {
 	return parseInt(0x00 + (sendType & 0x0f)) // bitwise and with low nibble to only get its value (send type)
+}
+
+module.exports = {
+	getChoicesArrayWithIncrementingNumbers,
+	getChoicesArrayOf1DArray,
+	getChoicesArrayOfKeyValueObject,
+	getVarNameInputLevel,
+	getVarNameZoneLevel,
+	getVarNameCGLevel,
+	checkIfValueOfEnum,
+	getChTypeOfSendType,
+	getSendChTypeOfSendType
 }

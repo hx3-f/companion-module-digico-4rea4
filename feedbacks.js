@@ -31,7 +31,7 @@ const {
 	snapshot_count,
 } = require('./constants')
 
-export function getFeedbacks() {
+function getFeedbacks() {
 	const feedbacks = {}
 
 	const ColorWhite = combineRgb(255, 255, 255)
@@ -124,6 +124,59 @@ export function getFeedbacks() {
 		'muteGroupMuteState',
 		offset_mute_groups,
 	)
+
+	return feedbacks
+}
+
+
+
+module.exports = function (self) {
+	const feedbacks = {}
+	const ColorWhite = combineRgb(255, 255, 255)
+	const ColorRed = combineRgb(200, 0, 0)
+
+	// Helper to generate generic mute feedback
+	const createMuteFeedback = (id, label, storeArray) => {
+		return {
+			type: 'boolean',
+			name: `Change background when ${label} is Muted`,
+			description: `If the selected ${label} is muted, change the style of the button`,
+			defaultStyle: {
+				color: ColorWhite,
+				bgcolor: ColorRed,
+			},
+			options: [
+				{
+					type: 'number',
+					label: `${label} Number`,
+					id: 'strip',
+					default: 1,
+					min: 1,
+					max: 128,
+				},
+			],
+			callback: (feedback) => {
+				// 0-based index maps perfectly to our separated arrays
+				const index = feedback.options.strip - 1 
+                if (!self[storeArray]) return false;
+				return self[storeArray][index] === 1
+			},
+		}
+	}
+
+	feedbacks['inputMute'] = createMuteFeedback('inputMute', 'Input', 'inputMuteState')
+	feedbacks['monoGroupMute'] = createMuteFeedback('monoGroupMute', 'Mono Group', 'monoGroupMuteState')
+	feedbacks['stereoGroupMute'] = createMuteFeedback('stereoGroupMute', 'Stereo Group', 'stereoGroupMuteState')
+	feedbacks['monoAuxMute'] = createMuteFeedback('monoAuxMute', 'Mono Aux', 'monoAuxMuteState')
+	feedbacks['stereoAuxMute'] = createMuteFeedback('stereoAuxMute', 'Stereo Aux', 'stereoAuxMuteState')
+	feedbacks['monoMatrixMute'] = createMuteFeedback('monoMatrixMute', 'Mono Matrix', 'monoMatrixMuteState')
+	feedbacks['stereoMatrixMute'] = createMuteFeedback('stereoMatrixMute', 'Stereo Matrix', 'stereoMatrixMuteState')
+	feedbacks['monoFxSendMute'] = createMuteFeedback('monoFxSendMute', 'Mono FX Send', 'monoFxSendMuteState')
+	feedbacks['stereoFxSendMute'] = createMuteFeedback('stereoFxSendMute', 'Stereo FX Send', 'stereoFxSendMuteState')
+	feedbacks['fxReturnMute'] = createMuteFeedback('fxReturnMute', 'FX Return', 'fxReturnMuteState')
+	feedbacks['areaOutsMute'] = createMuteFeedback('areaOutsMute', 'Area Out', 'areaOutsMuteState')
+	feedbacks['controlGroupCGMute'] = createMuteFeedback('controlGroupCGMute', 'CG', 'cgMuteState')
+	feedbacks['muteGroupMute'] = createMuteFeedback('muteGroupMute', 'Mute Group', 'muteGroupMuteState')
 
 	return feedbacks
 }

@@ -1,7 +1,7 @@
 /**
  *
  * Companion instance class for the DiGiCo 4rea4 line of consoles.
- * @version 1.0.5+alpha-1
+ * @version 1.0.5+alpha-2
  *
  */
 
@@ -11,6 +11,7 @@ const upgradeScripts = require('./upgrade')
 const Helpers = require('./helpers.js')
 const Constants = require('./constants.js')
 const MidiParser = require('./midi')
+const getFeedbacks = require('./feedbacks')
 const {
 	size_inputs,
 	size_mono_groups,
@@ -370,17 +371,25 @@ class ModuleInstance extends InstanceBase {
 	async init() {
 		// Initialize with current config or empty object if not set yet
 		await this.configUpdated(this.config || {})
-		this.inputMuteState = new Array(size_inputs).fill(0)
-		this.groupMuteState = new Array(size_mono_groups + size_stereo_groups).fill(0) // Covers Mono and Stereo Groups
-		this.auxMuteState = new Array(size_mono_aux + size_stereo_aux).fill(0) // Covers Mono and Stereo Auxes
-		this.matrixMuteState = new Array(size_mono_matrix + size_stereo_matrix).fill(0) // Covers Mono and Stereo Matrix
-		this.fxSendMuteState = new Array(size_mono_fx_sends + size_stereo_fx_sends).fill(0) // Covers Mono and Stereo FX Sends
+
+		this.monitoredFeedbacks = []
+		this.setFeedbackDefinitions(getFeedbacks(this))
+
+	this.stereoGroupMuteState = new Array(size_stereo_groups).fill(0) 
+		this.monoAuxMuteState = new Array(size_mono_aux).fill(0) 
+		this.stereoAuxMuteState = new Array(size_stereo_aux).fill(0) 
+		this.monoMatrixMuteState = new Array(size_mono_matrix).fill(0) 
+		this.stereoMatrixMuteState = new Array(size_stereo_matrix).fill(0) 
+		this.monoFxSendMuteState = new Array(size_mono_fx_sends).fill(0) 
+		this.stereoFxSendMuteState = new Array(size_stereo_fx_sends).fill(0) 
 		this.fxReturnMuteState = new Array(size_fx_returns).fill(0)
+		this.areaOutsMuteState = new Array(size_area_outs).fill(0)
 		this.cgMuteState = new Array(size_cg).fill(0)
 		this.muteGroupMuteState = new Array(size_mute_groups).fill(0)
-		this.areaOutsMuteState = new Array(size_area_outs).fill(0) // For Mains/Area Out
+
 		this.numberOfInputs = size_inputs
 		this.numberOfZones = size_area_outs
+
 	}
 
 	sendCommand(buffers) {
@@ -483,7 +492,7 @@ class ModuleInstance extends InstanceBase {
 		await this.pollAllMonitoredFeedbacks()
 
 		// get input info
-		let unitInAmount = constants.size_inputs
+		let unitInAmount = size_inputs
 		for (let index = 1; index <= unitInAmount; index++) {
 			this.requestMuteInfo(Constants.ChannelType.Input, index)
 			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
@@ -622,83 +631,145 @@ class ModuleInstance extends InstanceBase {
 			// Handle based on MIDI Channel (N=0)
 			//offsets handled in feedbacks.js
 			//TODO: generalize for different offset values here and in feedbacks.js
+			// switch (midiChannel) {
+			// 	case 0: // Ch N: Inputs
+			// 		if (note < size_inputs) {
+			// 			this.inputMuteState[note] = isMuted;
+			// 			this.checkFeedbacks('inputMute');
+			// 		}
+			// 		break
+				
+			// 	case 1: // Ch N+1: Groups
+			// 		if (note < size_mono_groups) {
+			// 			this.groupMuteState[note] = isMuted;
+			// 			this.checkFeedbacks('monoGroupMute');
+			// 		} else if (note >= size_mono_groups && note < size_mono_groups + size_stereo_groups) {
+			// 			this.groupMuteState[note - offset_stereo_groups] = isMuted; 
+			// 			this.checkFeedbacks('stereoGroupMute');
+			// 		}
+			// 		break
+
+			// 	case 2: // Ch N+2: Auxes (Mono 1-48, Stereo 1-24)
+			// 		if (note < size_mono_aux) {
+			// 			// Mono auxes 1-48
+			// 			this.auxMuteState[note] = isMuted
+			// 			this.checkFeedbacks('monoAuxMute')
+			// 		} else if (note >= size_mono_aux && note < size_mono_aux + size_stereo_aux) {
+			// 			//stereo auxes 1-24
+			// 			this.auxMuteState[note - offset_stereo_aux] = isMuted // Offset for Stereo Groups
+			// 			this.checkFeedbacks('stereoAuxMute')
+			// 		}
+			// 		break
+
+			// 	case 3: // Ch N+3: Matrices (Mono 1-48, Stereo 1-24)
+			// 		if (note < size_mono_matrix) {
+			// 			// Mono matrices 1-48
+			// 			this.matrixMuteState[note] = isMuted
+			// 			this.checkFeedbacks('monoMatrixMute')
+			// 		} else if (note >= size_mono_matrix && note < size_mono_matrix + size_stereo_matrix) {
+			// 			//stereo matrices 1-24
+			// 			this.matrixMuteState[note - offset_stereo_matrix] = isMuted // Offset for Stereo Groups
+			// 			this.checkFeedbacks('stereoMatrixMute')
+			// 		}
+			// 		break
+
+			// 	case 4: // Ch N+4: FX, Mains, CG, Mute Groups
+			// 		let fx_send_total = size_mono_fx_sends + size_stereo_fx_sends
+			// 		let fx_return_total = fx_send_total + size_fx_returns
+			// 		let area_outs_total = fx_return_total + size_area_outs
+			// 		let cg_total = area_outs_total + size_cg
+			// 		let mute_group_total = cg_total + size_mute_groups
+
+			// 		if (note >= 0x00 && note <= size_mono_fx_sends) {
+			// 			// Mono FX Send 1-16
+			// 			this.fxSendMuteState[note] = isMuted
+			// 			this.checkFeedbacks('monoFxSendMute')
+			// 		} else if (note >= size_mono_fx_sends && note <= fx_send_total) {
+			// 			// Stereo FX Send 1-16
+			// 			// Map to index 16-31 in our array
+			// 			this.fxSendMuteState[note - offset_stereo_fx_sends] = isMuted
+			// 			this.checkFeedbacks('stereoFxSendMute')
+			// 		} else if (note >= fx_send_total && note <= fx_return_total) {
+			// 			// FX Return 1-16
+			// 			this.fxReturnMuteState[note - offset_fx_returns] = isMuted
+			// 			this.checkFeedbacks('fxReturnMute')
+			// 		} else if (note >= fx_return_total && note <= area_outs_total) {
+			// 			// Area Outs 1-4
+			// 			this.areaOutsMuteState[note - offset_area_outs] = isMuted
+			// 			this.checkFeedbacks('areaOutsMute')
+			// 		} else if (note >= area_outs_total && note <= cg_total) {
+			// 			// CG 1-24
+			// 			this.cgMuteState[note - offset_cg] = isMuted
+			// 			this.checkFeedbacks('controlGroupCGMute')
+			// 		} else if (note >= cg_total && note <= mute_group_total) {
+			// 			// Mute Groups 1-8
+			// 			this.muteGroupMuteState[note - offset_mute_groups] = isMuted
+			// 			this.checkFeedbacks('muteGroupMute')
+			// 		}
+			// 		break
+			// }
+/////trying new swtich yo////
 			switch (midiChannel) {
 				case 0: // Ch N: Inputs
 					if (note < size_inputs) {
 						this.inputMuteState[note] = isMuted;
 						this.checkFeedbacks('inputMute');
 					}
-					break
+					break;
 				
 				case 1: // Ch N+1: Groups
 					if (note < size_mono_groups) {
-						this.groupMuteState[note] = isMuted;
+						this.monoGroupMuteState[note] = isMuted;
 						this.checkFeedbacks('monoGroupMute');
-					} else if (note >= size_mono_groups && note < size_mono_groups + size_stereo_groups) {
-						this.groupMuteState[note - offset_stereo_groups] = isMuted; 
+					} else if (note >= 0x40 && note < 0x40 + size_stereo_groups) {
+						this.stereoGroupMuteState[note - 0x40] = isMuted; 
 						this.checkFeedbacks('stereoGroupMute');
 					}
-					break
+					break;
 
-				case 2: // Ch N+2: Auxes (Mono 1-48, Stereo 1-24)
+				case 2: // Ch N+2: Auxes 
 					if (note < size_mono_aux) {
-						// Mono auxes 1-48
-						this.auxMuteState[note] = isMuted
-						this.checkFeedbacks('monoAuxMute')
-					} else if (note >= size_mono_aux && note < size_mono_aux + size_stereo_aux) {
-						//stereo auxes 1-24
-						this.auxMuteState[note - offset_stereo_aux] = isMuted // Offset for Stereo Groups
-						this.checkFeedbacks('stereoAuxMute')
+						this.monoAuxMuteState[note] = isMuted;
+						this.checkFeedbacks('monoAuxMute');
+					} else if (note >= 0x40 && note < 0x40 + size_stereo_aux) {
+						this.stereoAuxMuteState[note - 0x40] = isMuted;
+						this.checkFeedbacks('stereoAuxMute');
 					}
-					break
+					break;
 
-				case 3: // Ch N+3: Matrices (Mono 1-48, Stereo 1-24)
+				case 3: // Ch N+3: Matrices 
 					if (note < size_mono_matrix) {
-						// Mono matrices 1-48
-						this.matrixMuteState[note] = isMuted
-						this.checkFeedbacks('monoMatrixMute')
-					} else if (note >= size_mono_matrix && note < size_mono_matrix + size_stereo_matrix) {
-						//stereo matrices 1-24
-						this.matrixMuteState[note - offset_stereo_matrix] = isMuted // Offset for Stereo Groups
-						this.checkFeedbacks('stereoMatrixMute')
+						this.monoMatrixMuteState[note] = isMuted;
+						this.checkFeedbacks('monoMatrixMute');
+					} else if (note >= 0x40 && note < 0x40 + size_stereo_matrix) {
+						this.stereoMatrixMuteState[note - 0x40] = isMuted; 
+						this.checkFeedbacks('stereoMatrixMute');
 					}
-					break
+					break;
 
 				case 4: // Ch N+4: FX, Mains, CG, Mute Groups
-					let fx_send_total = size_mono_fx_sends + size_stereo_fx_sends
-					let fx_return_total = fx_send_total + size_fx_returns
-					let area_outs_total = fx_return_total + size_area_outs
-					let cg_total = area_outs_total + size_cg
-					let mute_group_total = cg_total + size_mute_groups
-
-					if (note >= 0x00 && note <= size_mono_fx_sends) {
-						// Mono FX Send 1-16
-						this.fxSendMuteState[note] = isMuted
-						this.checkFeedbacks('monoFxSendMute')
-					} else if (note >= size_mono_fx_sends && note <= fx_send_total) {
-						// Stereo FX Send 1-16
-						// Map to index 16-31 in our array
-						this.fxSendMuteState[note - offset_stereo_fx_sends] = isMuted
-						this.checkFeedbacks('stereoFxSendMute')
-					} else if (note >= fx_send_total && note <= fx_return_total) {
-						// FX Return 1-16
-						this.fxReturnMuteState[note - offset_fx_returns] = isMuted
-						this.checkFeedbacks('fxReturnMute')
-					} else if (note >= fx_return_total && note <= area_outs_total) {
-						// Area Outs 1-4
-						this.areaOutsMuteState[note - offset_area_outs] = isMuted
-						this.checkFeedbacks('areaOutsMute')
-					} else if (note >= area_outs_total && note <= cg_total) {
-						// CG 1-24
-						this.cgMuteState[note - offset_cg] = isMuted
-						this.checkFeedbacks('controlGroupCGMute')
-					} else if (note >= cg_total && note <= mute_group_total) {
-						// Mute Groups 1-8
-						this.muteGroupMuteState[note - offset_mute_groups] = isMuted
-						this.checkFeedbacks('muteGroupMute')
+					if (note >= 0x00 && note < size_mono_fx_sends) {
+						this.monoFxSendMuteState[note] = isMuted;
+						this.checkFeedbacks('monoFxSendMute');
+					} else if (note >= 0x10 && note < 0x10 + size_stereo_fx_sends) {
+						this.stereoFxSendMuteState[note - 0x10] = isMuted;
+						this.checkFeedbacks('stereoFxSendMute');
+					} else if (note >= 0x20 && note < 0x20 + size_fx_returns) {
+						this.fxReturnMuteState[note - 0x20] = isMuted;
+						this.checkFeedbacks('fxReturnMute');
+					} else if (note >= 0x30 && note < 0x30 + size_area_outs) {
+						this.areaOutsMuteState[note - 0x30] = isMuted;
+						this.checkFeedbacks('areaOutsMute');
+					} else if (note >= 0x36 && note < 0x36 + size_cg) {
+						this.cgMuteState[note - 0x36] = isMuted;
+						this.checkFeedbacks('controlGroupCGMute');
+					} else if (note >= 0x40 && note < 0x40 + size_mute_groups) {
+						this.muteGroupMuteState[note - 0x40] = isMuted;
+						this.checkFeedbacks('muteGroupMute');
 					}
-					break
+					break;
 			}
+
 
 			// Skip the next 2 bytes since we processed them
 			i += 2
