@@ -1,7 +1,7 @@
 /**
  *
  * Companion instance class for the DiGiCo 4rea4 line of consoles.
- * @version 1.0.5+alpha-2
+ * @version 1.0.5+alpha-3
  *
  */
 
@@ -772,9 +772,6 @@ async init() {
 					break;
 			}
 
-
-			// Skip the next 2 bytes since we processed them
-			i += 2
 		}
 	}
 
