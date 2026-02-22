@@ -368,14 +368,17 @@ class ModuleInstance extends InstanceBase {
 	 * @access public
 	 * @since 1.2.0
 	 */
-	async init() {
+async init() {
 		// Initialize with current config or empty object if not set yet
 		await this.configUpdated(this.config || {})
 
 		this.monitoredFeedbacks = []
 		this.setFeedbackDefinitions(getFeedbacks(this))
 
-	this.stereoGroupMuteState = new Array(size_stereo_groups).fill(0) 
+		this.inputMuteState = new Array(size_inputs).fill(0)
+		this.monoGroupMuteState = new Array(size_mono_groups).fill(0) 
+
+		this.stereoGroupMuteState = new Array(size_stereo_groups).fill(0) 
 		this.monoAuxMuteState = new Array(size_mono_aux).fill(0) 
 		this.stereoAuxMuteState = new Array(size_stereo_aux).fill(0) 
 		this.monoMatrixMuteState = new Array(size_mono_matrix).fill(0) 
@@ -389,7 +392,6 @@ class ModuleInstance extends InstanceBase {
 
 		this.numberOfInputs = size_inputs
 		this.numberOfZones = size_area_outs
-
 	}
 
 	sendCommand(buffers) {
