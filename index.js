@@ -1,7 +1,7 @@
 /**
  *
  * Companion instance class for the DiGiCo 4rea4 line of consoles.
- * @version 1.0.4+alpha-5
+ * @version 1.0.5+alpha-1
  *
  */
 
@@ -586,7 +586,7 @@ class ModuleInstance extends InstanceBase {
 		]
 		this.sendCommand(buffer)
 	}
-	processIncomingData(data) {
+	processIncomingData(message) {
 		// for (let i = 0; i < data.length; i++) {
 		// 	let byte = data[i]
 
