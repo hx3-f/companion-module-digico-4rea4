@@ -1,16 +1,15 @@
 /**
  *
  * Companion instance class for the DiGiCo 4rea4 line of consoles.
- * @version 1.0.4+alpha-3
+ * @version 1.0.4+alpha-4
  *
  */
-
-import * as Helpers from './helpers.js'
-import * as Constants from './constants.js'
 
 const { InstanceBase, Regex, runEntrypoint, TCPHelper, InstanceStatus } = require('@companion-module/base')
 const actions = require('./actions')
 const upgradeScripts = require('./upgrade')
+const Helpers = require('./helpers.js')
+const Constants = require('./constants.js')
 const {
 	size_inputs,
 	size_mono_groups,
@@ -379,8 +378,8 @@ class ModuleInstance extends InstanceBase {
 		this.cgMuteState = new Array(size_cg).fill(0)
 		this.muteGroupMuteState = new Array(size_mute_groups).fill(0)
 		this.areaOutsMuteState = new Array(size_area_outs).fill(0) // For Mains/Area Out
-		this.numberOfInputs = constants.size_inputs
-		this.numberOfZones = constants.size_area_outs
+		this.numberOfInputs = size_inputs
+		this.numberOfZones = size_area_outs
 	}
 
 	sendCommand(buffers) {
@@ -448,6 +447,26 @@ class ModuleInstance extends InstanceBase {
 		}
 	}
 
+	async pollAllMonitoredFeedbacks() {
+		for (const feedback of this.monitoredFeedbacks) {
+			await this.pollMonitoredFeedback(feedback)
+			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
+		}
+	}
+
+	async pollMonitoredFeedback(feedback) {
+		switch (feedback.type) {
+			case Constants.MonitoredFeedbackType.MuteState:
+				this.requestSendMuteInfo(feedback.sendType, feedback.channel, feedback.sendChannel)
+				break
+			case Constants.MonitoredFeedbackType.Undefined:
+				// do nothing
+				break
+			default:
+				console.log(`pollMonitoredFeedback: type of feedback not implemented`)
+		}
+	}
+
 	sleep(ms) {
 		return new Promise((resolve) => setTimeout(resolve, ms))
 	}
@@ -464,7 +483,7 @@ class ModuleInstance extends InstanceBase {
 			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
 		}
 		// get zone info
-		let unitZonesAmount = area_outs_total
+		let unitZonesAmount = size_area_outs
 		for (let index = 1; index <= unitZonesAmount; index++) {
 			this.requestMuteInfo(Constants.ChannelType.Zone, index)
 			await this.sleep(TIME_BETW_MULTIPLE_REQ_MS)
