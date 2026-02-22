@@ -1,7 +1,7 @@
 /**
  *
  * Companion instance class for the DiGiCo 4rea4 line of consoles.
- * @version 1.0.4+alpha-4
+ * @version 1.0.4+alpha-5
  *
  */
 
@@ -10,6 +10,7 @@ const actions = require('./actions')
 const upgradeScripts = require('./upgrade')
 const Helpers = require('./helpers.js')
 const Constants = require('./constants.js')
+const MidiParser = require('./midi')
 const {
 	size_inputs,
 	size_mono_groups,
@@ -412,6 +413,7 @@ class ModuleInstance extends InstanceBase {
 
 		if (this.config.host) {
 			this.midiSocket = new TCPHelper(this.config.host, this.config.midiPort)
+			this.midiParser = new MidiParser();
 
 			this.midiSocket.on('status_change', (status, message) => {
 				this.updateStatus(status, message)
@@ -421,8 +423,14 @@ class ModuleInstance extends InstanceBase {
 				this.log('error', 'MIDI error: ' + err.message)
 			})
 
-			this.midiSocket.on('data', (data) => {
-				this.processIncomingData(data)
+			this.midiSocket.on('data', (e) => {
+				// Send raw chunks to the parser
+				this.midiParser.processData(e) 
+			})
+			
+			this.midiParser.addListener("message", (message) => {
+				// The parser emits a "message" event only when a full MIDI packet is ready
+				this.processIncomingData(message) 
 			})
 
 			this.midiSocket.on('connect', () => {
@@ -579,24 +587,37 @@ class ModuleInstance extends InstanceBase {
 		this.sendCommand(buffer)
 	}
 	processIncomingData(data) {
-		for (let i = 0; i < data.length; i++) {
-			let byte = data[i]
+		// for (let i = 0; i < data.length; i++) {
+		// 	let byte = data[i]
 
-			// Check for Note On messages (0x90 - 0x9F)
-			// Assuming MIDI Channel N = 0 (Default). Adjust logic if N > 0.
-			if (byte >= 0x90 && byte <= 0x94) {
-				if (byte == 0) {
-					break // Prevent out-of-bounds access
-				} else {
-					byte = 0
-				}
-			}
-			let midiChannel = byte & 0x0f
-			let note = data[i + 1]
-			let velocity = data[i + 2]
+		// 	// Check for Note On messages (0x90 - 0x9F)
+		// 	// Assuming MIDI Channel N = 0 (Default). Adjust logic if N > 0.
+		// 	if (byte >= 0x90 && byte <= 0x94) {
+		// 		if (byte == 0) {
+		// 			break // Prevent out-of-bounds access
+		// 		} else {
+		// 			byte = 0
+		// 		}
+		// 	}
+		// 	let midiChannel = byte & 0x0f
+		// 	let note = data[i + 1]
+		// 	let velocity = data[i + 2]
+
+		// 	// 4rea4 Spec: Velocity > 0x40 is Mute ON, < 0x40 is Mute OFF
+		// 	let isMuted = velocity >= 0x40 ? 1 : 0
+		// The MidiParser provides the raw message array, guaranteed to be complete.
+
+		let data = message.raw;
+		let byte = data[0];
+
+		// Check for Note On messages (0x90 - 0x9F)
+		if (byte >= 0x90 && byte <= 0x94) {
+			let midiChannel = byte & 0x0f;
+			let note = data[1];
+			let velocity = data[2];
 
 			// 4rea4 Spec: Velocity > 0x40 is Mute ON, < 0x40 is Mute OFF
-			let isMuted = velocity >= 0x40 ? 1 : 0
+			let isMuted = velocity >= 0x40 ? 1 : 0;
 
 			// Handle based on MIDI Channel (N=0)
 			//offsets handled in feedbacks.js
@@ -604,20 +625,18 @@ class ModuleInstance extends InstanceBase {
 			switch (midiChannel) {
 				case 0: // Ch N: Inputs
 					if (note < size_inputs) {
-						this.inputMuteState[note] = isMuted
-						this.checkFeedbacks('inputMute')
+						this.inputMuteState[note] = isMuted;
+						this.checkFeedbacks('inputMute');
 					}
 					break
-
-				case 1: // Ch N+1: Groups (Mono 1-48, Stereo 1-24)
+				
+				case 1: // Ch N+1: Groups
 					if (note < size_mono_groups) {
-						// Mono Groups 1-48
-						this.groupMuteState[note] = isMuted
-						this.checkFeedbacks('monoGroupMute')
+						this.groupMuteState[note] = isMuted;
+						this.checkFeedbacks('monoGroupMute');
 					} else if (note >= size_mono_groups && note < size_mono_groups + size_stereo_groups) {
-						//stereo Groups 1-24
-						this.groupMuteState[note - offset_stereo_groups] = isMuted // Offset for Stereo Groups
-						this.checkFeedbacks('stereoGroupMute')
+						this.groupMuteState[note - offset_stereo_groups] = isMuted; 
+						this.checkFeedbacks('stereoGroupMute');
 					}
 					break
 
