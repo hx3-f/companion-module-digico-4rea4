@@ -313,7 +313,7 @@ class ModuleInstance extends InstanceBase {
 				id: 'midiPort',
 				label: 'MIDI Port',
 				width: 6,
-				default: 51325, //changed from 51321
+				default: 51321, //changed from 51321
 				min: 1,
 				max: 65535,
 			},
@@ -323,7 +323,7 @@ class ModuleInstance extends InstanceBase {
 				id: 'tcpPort',
 				label: 'TCP Port',
 				width: 6,
-				default: 51321,
+				default: 51325, //trying new defaults
 				min: 1,
 				max: 65535,
 			},
@@ -674,14 +674,14 @@ class ModuleInstance extends InstanceBase {
 		this.config = config || {
 			host: '192.168.1.70',
 			model: '4rea4',
-			midiPort: 51328,
-			tcpPort: 51321,
+			midiPort: 51321,
+			tcpPort: 51325,
 			midiChannel: 0,
 		}
 
 		// Ensure port defaults are set even if config exists
-		if (!this.config.midiPort) this.config.midiPort = 51328
-		if (!this.config.tcpPort) this.config.tcpPort = 51321
+		if (!this.config.midiPort) this.config.midiPort = 51321
+		if (!this.config.tcpPort) this.config.tcpPort = 51325
 		if (this.config.midiChannel === undefined) this.config.midiChannel = 0
 
 		this.updateActions()
